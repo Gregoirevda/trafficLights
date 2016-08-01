@@ -1,0 +1,604 @@
+var containerDimension = 250;
+var blockHouseSize = Math.floor(containerDimension / 3);
+var roadWidth = containerDimension - (blockHouseSize * 2);
+var colors = ["aqua", "black", "purple", "springGreen", "silver", "brown", "coral", "teal", "chartreuse"];
+var positions = ["top", "bottom", "left", "right"];
+var distanceBetweenCars = 10;
+
+//http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+function guid() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+    s4() + '-' + s4() + s4() + s4();
+}
+
+//The map containg... a map
+function Map() {
+    //container div holding the map
+    var containers = document.getElementsByTagName("body");
+    containers[0].innerHTML = "";
+    containers[0].appendChild(document.createElement("div"));
+    var divContainer = document.getElementsByTagName("div");
+
+    this.map = divContainer[0];
+    this.map.style.height = containerDimension + "px";
+    this.map.style.width = containerDimension + "px";
+    this.map.style.margin = "auto";
+    this.map.style.backgroundColor = "white";
+    this.map.style.border = "1px solid black";
+    this.map.style.position = "relative";
+
+
+
+    //Create house blocks
+    var houseTopLeft = document.createElement("div");
+    houseTopLeft.style.border = "1px solid black";
+    houseTopLeft.style.width = blockHouseSize + "px";
+    houseTopLeft.style.height = blockHouseSize + "px";
+    houseTopLeft.style.position = "absolute";
+    houseTopLeft.style.top = "0px";
+    houseTopLeft.style.left = "0px";
+
+    var houseTopRight = document.createElement("div");
+    houseTopRight.style.border = "1px solid black";
+    houseTopRight.style.width = blockHouseSize + "px";
+    houseTopRight.style.height = blockHouseSize+ "px";
+    houseTopRight.style.position = "absolute";
+    houseTopRight.style.top = "0px";
+    houseTopRight.style.right = "0px";
+
+    var houseBottomLeft = document.createElement("div");
+    houseBottomLeft.style.border = "1px solid black";
+    houseBottomLeft.style.width = blockHouseSize + "px";
+    houseBottomLeft.style.height = blockHouseSize + "px";
+    houseBottomLeft.style.position = "absolute";
+    houseBottomLeft.style.bottom = "0px";
+    houseBottomLeft.style.left = "0px";
+
+    var houseBottomRight = document.createElement("div");
+    houseBottomRight.style.border = "1px solid black";
+    houseBottomRight.style.width = blockHouseSize + "px";
+    houseBottomRight.style.height = blockHouseSize + "px";
+    houseBottomRight.style.position = "absolute";
+    houseBottomRight.style.bottom = "0px";
+    houseBottomRight.style.right = "0px";
+
+
+    this.map.appendChild(houseTopLeft);
+    this.map.appendChild(houseTopRight);
+    this.map.appendChild(houseBottomLeft);
+    this.map.appendChild(houseBottomRight);
+
+    //Add double line roads
+    var horizontalRoad = document.createElement("div");
+    horizontalRoad.style.border = "1px solid black";
+    horizontalRoad.style.height = roadWidth + "px";
+    horizontalRoad.style.width = containerDimension + "px";
+    horizontalRoad.style.position = "absolute";
+    horizontalRoad.style.top = blockHouseSize + "px";
+
+    var verticalRoad = document.createElement("div");
+    verticalRoad.style.border = "1px solid black";
+    verticalRoad.style.height = containerDimension + "px";
+    verticalRoad.style.width = roadWidth + "px";
+    verticalRoad.style.position = "absolute";
+    verticalRoad.style.left = blockHouseSize + "px";
+
+    this.map.appendChild(horizontalRoad);
+    this.map.appendChild(verticalRoad);
+
+    //Add vertical roads
+    var verticalDownRoad = document.createElement("div");
+    verticalDownRoad.style.border = "1px solid red";
+    verticalDownRoad.style.width = roadWidth / 2 + "px";
+    verticalDownRoad.style.height = containerDimension + "px";
+    verticalDownRoad.style.position = "absolute";
+    verticalDownRoad.style.left = "0px";
+
+    var verticalUpRoad = document.createElement("div");
+    verticalUpRoad.style.border = "1px solid green";
+    verticalUpRoad.style.width = roadWidth / 2 + "px";
+    verticalUpRoad.style.height = containerDimension + "px";
+    verticalUpRoad.style.position = "absolute";
+    verticalUpRoad.style.right = "0px";
+
+    //Add horizontal roads
+    var horizontalLeftRoad = document.createElement("div");
+    horizontalLeftRoad.style.border = "1px solid pink";
+    horizontalLeftRoad.style.height = roadWidth / 2 + "px";
+    horizontalLeftRoad.style.width = containerDimension + "px";
+    horizontalLeftRoad.style.position = "absolute";
+    horizontalLeftRoad.style.top = "0px";
+
+    var horizontalRightRoad = document.createElement("div");
+    horizontalRightRoad.style.border = "1px solid blue";
+    horizontalRightRoad.style.height = roadWidth / 2 + "px";
+    horizontalRightRoad.style.width = containerDimension + "px";
+    horizontalRightRoad.style.position = "absolute";
+    horizontalRightRoad.style.bottom = "0px";
+
+    verticalRoad.appendChild(verticalDownRoad);
+    verticalRoad.appendChild(verticalUpRoad);
+    horizontalRoad.appendChild(horizontalLeftRoad);
+    horizontalRoad.appendChild(horizontalRightRoad);
+
+
+    //add traffic lights
+    this.topTrafficLight = document.createElement("div");
+    this.topTrafficLight.style.width = "5px";
+    this.topTrafficLight.style.height = "10px";
+    this.topTrafficLight.style.backgroundColor = "red";
+    this.topTrafficLight.style.position = "absolute";
+    this.topTrafficLight.style.top = blockHouseSize - 14 + "px";
+    this.topTrafficLight.style.left = "1px";
+    this.topTrafficLight.style.borderRadius = "10px";
+
+    this.bottomTrafficLight = document.createElement("div");
+    this.bottomTrafficLight.style.width = "5px";
+    this.bottomTrafficLight.style.height = "10px";
+    this.bottomTrafficLight.style.backgroundColor = "red";
+    this.bottomTrafficLight.style.position = "absolute";
+    this.bottomTrafficLight.style.bottom = blockHouseSize - 14 + "px";
+    this.bottomTrafficLight.style.right = "1px";
+    this.bottomTrafficLight.style.borderRadius = "10px";
+
+    this.leftTrafficLight = document.createElement("div");
+    this.leftTrafficLight.style.width = "10px";
+    this.leftTrafficLight.style.height = "5px";
+    this.leftTrafficLight.style.backgroundColor = "red";
+    this.leftTrafficLight.style.position = "absolute";
+    this.leftTrafficLight.style.left = blockHouseSize - 14 + "px";
+    this.leftTrafficLight.style.bottom = "1px";
+    this.leftTrafficLight.style.borderRadius = "10px";
+
+    this.rightTrafficLight = document.createElement("div");
+    this.rightTrafficLight.style.width = "10px";
+    this.rightTrafficLight.style.height = "5px";
+    this.rightTrafficLight.style.backgroundColor = "red";
+    this.rightTrafficLight.style.position = "absolute";
+    this.rightTrafficLight.style.right = blockHouseSize - 14 + "px";
+    this.rightTrafficLight.style.top = "1px";
+    this.rightTrafficLight.style.borderRadius = "10px";
+
+    verticalDownRoad.appendChild(this.topTrafficLight);
+    verticalUpRoad.appendChild(this.bottomTrafficLight);
+    horizontalRightRoad.appendChild(this.leftTrafficLight);
+    horizontalLeftRoad.appendChild(this.rightTrafficLight);
+
+
+    //Easily get back start/end position
+    this.startPosition = {
+        top : { 
+            x : blockHouseSize + (roadWidth / 4), 
+            y : 0, 
+            label : "top" 
+        },
+        bottom : {
+            x : blockHouseSize * 2 - (roadWidth / 4),
+            y : containerDimension,
+            label : "bottom"
+        },
+        left : {
+            x : 0,
+            y : blockHouseSize * 2 - (roadWidth / 4),
+            label : "left"
+        },
+        right : {
+            x : containerDimension,
+            y : blockHouseSize + (roadWidth / 4), 
+            label : "right"
+        }  
+    }; 
+
+    this.endPosition = {
+        bottom : { 
+            x : blockHouseSize + (roadWidth / 4), 
+            y : containerDimension,
+            label : "bottom" 
+        },
+        top : {
+            x : blockHouseSize * 2 - (roadWidth / 4),
+            y : 0,
+            label : "top"
+        },
+        left : {
+            x : 0,
+            y : blockHouseSize + (roadWidth / 4), 
+            label : "left"
+        },
+        right : {
+            x : containerDimension,
+            y : blockHouseSize * 2 - (roadWidth / 4),
+            label : "right"
+        }
+    };
+}
+
+//Adding cars to the map
+Map.prototype.addCar = function(car) {
+    car.element.style.top = car.y + "px";
+    car.element.style.left = car.x + "px";
+    this.map.appendChild(car.element);
+    traffic.addCar(car);
+    return car.id;
+};
+
+Map.prototype.moveToIntersection = function(car) {
+
+    switch(car.itinary.start.label) {
+        case "top" : 
+            if(car.y + car.dimension < blockHouseSize) {
+                //Only move if no car in front of him
+                if(!Car.hasCarInFront(car, function(i) {
+                    return traffic.cars[i].x == car.x && traffic.cars[i].y == car.y + distanceBetweenCars;
+                })) {
+                    car.y++;
+                }
+            }
+            else {
+                car.isAtTrafficLights = true;
+                intersection.top.push(car);
+            }
+            break;
+        case "bottom" : 
+            if(containerDimension - car.y + car.dimension < blockHouseSize) {
+                if(!Car.hasCarInFront(car, function(i) {
+                    return traffic.cars[i].x == car.x && traffic.cars[i].y == car.y - distanceBetweenCars;
+                })) {
+                    car.y--;
+                }
+            }
+            else {
+                car.isAtTrafficLights = true;
+                intersection.bottom.push(car);
+            }
+            break;
+        case "left" : 
+            if(car.x + car.dimension < blockHouseSize) {
+                if(!Car.hasCarInFront(car, function(i) {
+                    return traffic.cars[i].y == car.y && traffic.cars[i].x == car.x + distanceBetweenCars;
+                })) {
+                    car.x++;
+                }
+            }
+            else {
+                car.isAtTrafficLights = true;
+                intersection.left.push(car);
+            }
+            break;
+        case "right" : 
+            if(containerDimension - car.x + car.dimension < blockHouseSize) {
+                if(!Car.hasCarInFront(car, function(i) {
+                    return traffic.cars[i].y == car.y && traffic.cars[i].x == car.x - distanceBetweenCars;
+                })) {
+                    car.x--;
+                }
+            }
+            else {
+                car.isAtTrafficLights = true;
+                intersection.right.push(car);
+            }
+            break;
+
+    }
+
+    //draw on map
+    car.element.style.top = car.y + "px";
+    car.element.style.left = car.x + "px";
+};
+
+Map.prototype.moveToEndPoint = function(car) {
+    switch(car.itinary.end.label) {
+        case "bottom" : 
+            if(car.y >= blockHouseSize * 2){
+                intersection.removeCar(car);
+            }
+            if(car.y >= car.itinary.end.y) {
+                traffic.removeCar(car);
+            } else if(car.x < car.itinary.end.x) {
+                car.x++;
+            } else if(car.x > car.itinary.end.x) {
+                car.x--;
+            } else
+            car.y++;
+            break;
+        case "top" : 
+            if(car.y <= blockHouseSize){
+                intersection.removeCar(car);
+            }
+            if(car.y <= 0) {
+                traffic.removeCar(car);
+            } else if(car.x < car.itinary.end.x) {
+                car.x++;
+            } else if(car.x > car.itinary.end.x) {
+                car.x--;
+            } else
+            car.y--;
+            break;
+        case "left" : 
+            if(car.x <= blockHouseSize){
+                intersection.removeCar(car);
+            }
+            if(car.x <= 0) {
+                traffic.removeCar(car);
+            }
+            else if(car.y > car.itinary.end.y) {
+                car.y--;
+            } else if(car.y < car.itinary.end.y) {
+                car.y++;
+            } else
+            car.x--;
+            break;
+        case "right" : 
+            if(car.x >= blockHouseSize * 2){
+                intersection.removeCar(car);
+            }
+            if(car.x >= car.itinary.end.x) {
+                traffic.removeCar(car);
+            }
+            else if(car.y > car.itinary.end.y) {
+                car.y--;
+            } else if(car.y < car.itinary.end.y) {
+                car.y++;
+            } else
+            car.x++;
+            break;
+    }
+
+    //draw on map
+    car.element.style.top = car.y + "px";
+    car.element.style.left = car.x + "px";
+};
+
+//Itinary of a car
+function Itinary() {
+    this.start = map.startPosition[positions[Math.floor(Math.random() * 4)]];
+    var temp;
+
+    while(true) {
+        temp = map.endPosition[positions[Math.floor(Math.random() * 4)]];
+        if(temp.label != this.start.label) {
+            this.end = temp;
+            break;
+        }
+    }
+}
+
+
+//Moving elements
+
+//Traffic (multiple cars)
+function Traffic() {
+    this.cars = [];
+}
+
+Traffic.prototype.step = function() {
+    for(var i = 0, l = this.cars.length; i < l; i++) {
+        if(this.cars[i] && !this.cars[i].isAtTrafficLights) {
+            map.moveToIntersection(this.cars[i]);
+        } else if(this.cars[i] && this.cars[i].hasPassedTrafficLights) {
+            map.moveToEndPoint(this.cars[i]);
+        }
+    }
+};
+
+Traffic.prototype.addCar = function(car) {
+    this.cars.push(car);
+};
+
+Traffic.prototype.start = function () {
+    (function trafficInterval() {
+        window.setTimeout(function() {
+            traffic.step();
+            trafficInterval();
+        }, 10);
+    })();
+}
+
+Traffic.prototype.removeCar = function(car) {
+    for(var i = 0, l = this.cars.length; i < l; i++) {
+        if(this.cars[i].guid == car.guid) {
+            this.cars.splice(i, 1);
+            break;
+        }
+    }
+}
+
+
+//Single Car
+function Car(x, y, color, width, height) {
+    this.element = document.createElement("div");
+    this.element.style.position = "absolute";
+    this.element.style.top = y ? y + "px" : "0px";
+    this.element.style.left = x ? x + "px" : "0px";
+    this.element.style.width = width ? width + "px" : "5px";
+    this.element.style.height = height ? height + "px" : "5px";
+    this.element.style.backgroundColor = color || "red";
+    this.guid = guid();
+    this.position;//used until the intersection, to know how many cars in front
+    this.itinary = undefined;
+    this.dimension = width || 5;
+    this.x;
+    this.y;
+    this.isAtTrafficLights = false;
+    this.hasPassedTrafficLights = false; //he can continue until his end point
+    return this;
+}
+
+Car.hasCarInFront = function(car, condition) {
+    for(var i = 0, l = traffic.cars.length; i < l; i++) {
+        if(condition(i)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+Car.prototype.setItinary = function(itinary) {
+    this.itinary = itinary;
+    this.x = itinary.start.x;
+    this.y = itinary.start.y;
+};
+
+function Intersection() {
+    this.top = [];
+    this.bottom = [];
+    this.left = [];
+    this.right = [];
+
+    this.lights = {
+      top : false,
+      bottom : false,
+      left : false,
+      right : false  
+    };
+}
+
+Intersection.prototype.removeCar = function(car) {
+    for(var i = 0, l = this[car.itinary.start.label].length; i < l; i++) {
+        if(this[car.itinary.start.label][i].guid === car.guid){
+            this[car.itinary.start.label].splice(i, 1);
+            break;
+        }
+    }  
+};
+
+Intersection.prototype.openTop = function() {
+    this.lights.top = true;   
+    map.topTrafficLight.style.backgroundColor = "green";
+    for(var i = 0, l = this.top.length; i < l; i++) {
+        this.top[i].hasPassedTrafficLights = true;
+    }
+};
+
+Intersection.prototype.openBottom = function() {
+    this.lights.bottom = true;
+    map.bottomTrafficLight.style.backgroundColor = "green";
+    for(var i = 0, l = this.bottom.length; i < l; i++) {
+        this.bottom[i].hasPassedTrafficLights = true;
+    }
+};
+
+Intersection.prototype.openLeft = function() {
+    this.lights.left = true;
+    map.leftTrafficLight.style.backgroundColor = "green";
+    for(var i = 0, l = this.left.length; i < l; i++) {
+        this.left[i].hasPassedTrafficLights = true;
+    }
+};
+
+Intersection.prototype.openRight = function() {
+    this.lights.right = true;
+    map.rightTrafficLight.style.backgroundColor = "green";
+    for(var i = 0, l = this.right.length; i < l; i++) {
+        this.right[i].hasPassedTrafficLights = true;
+    }
+};
+
+Intersection.prototype.start = function() {
+    (function intersectionInterval() {
+        window.setTimeout(function() {
+            intersection.step();
+            intersectionInterval();
+        }, 10);  
+    })();
+};
+
+Intersection.prototype.step = function() {
+    //for the first exercice, we assume when a traffic light turns green, cars can go in any directions
+    
+    //Turn traffic lights to red if no car waiting
+    if(this.top.length == 0) {
+        this.lights.top = false;
+        map.topTrafficLight.style.backgroundColor = "red";
+    } if(this.bottom.length == 0) {
+        this.lights.bottom = false;
+        map.bottomTrafficLight.style.backgroundColor = "red";
+    } if(this.left.length == 0) {
+        this.lights.left = false;
+        map.leftTrafficLight.style.backgroundColor = "red";
+    } if(this.right.length == 0) {
+        this.lights.right = false;
+        map.rightTrafficLight.style.backgroundColor = "red";
+    }
+    
+
+    if(this.top.length > 0 && this.lights.left == false && this.lights.right == false && this.lights.bottom == false) {
+      intersection.openTop();
+    } else if(this.bottom.length > 0 && this.lights.left == false && this.lights.right == false && this.lights.top == false) {
+        intersection.openBottom();
+    } else if(this.left.length > 0 && this.lights.top == false && this.lights.bottom == false && this.lights.right == false) {
+        intersection.openLeft();
+    } else if(this.right.length > 0 && this.lights.top == false && this.lights.bottom == false && this.lights.left == false) {
+        intersection.openRight();
+    }
+};
+
+
+
+//Using the Objects
+var map = new Map();
+var traffic = new Traffic();
+var intersection = new Intersection();
+
+traffic.start();
+intersection.start();
+
+setInterval(function(){
+
+    //Car is created
+    var car = new Car(undefined, undefined, colors[Math.floor(Math.random() * 9)]);
+
+    //A car knows its itinary (it uses variables on map to know the possible start and end positions)
+    //the itinary is randomly generated
+    var itinary = new Itinary();
+    //Setting the itinary of the car also sets the x and y position of the car
+    car.setItinary(itinary);
+
+    //The car is added to the map
+    //This has the effect to also add it to the traffic
+    var carId = map.addCar(car);
+
+}, 500);
+
+
+
+(function debuggingPurpose() {
+    var trafficDebugger = document.createElement("div");
+    trafficDebugger.style.position = "absolute";
+
+    var intersectionDebuggerTop = document.createElement("div");
+    intersectionDebuggerTop.style.position = "absolute";
+    intersectionDebuggerTop.style.top = "0px";
+
+    var intersectionDebuggerBottom = document.createElement("div");
+    intersectionDebuggerBottom.style.position = "absolute";
+    intersectionDebuggerBottom.style.top = "15px";
+
+    var intersectionDebuggerLeft = document.createElement("div");
+    intersectionDebuggerLeft.style.position = "absolute";
+    intersectionDebuggerLeft.style.top = "30px";
+
+    var intersectionDebuggerRight = document.createElement("div");
+    intersectionDebuggerRight.style.position = "absolute";
+    intersectionDebuggerRight.style.top = "45px";
+
+    setInterval(function() {
+        trafficDebugger.innerHTML = "Traffic : " + traffic.cars.length;
+        intersectionDebuggerTop.innerHTML = "Top : " + intersection.top.length;
+        intersectionDebuggerBottom.innerHTML = "Bottom : " + intersection.bottom.length;
+        intersectionDebuggerLeft.innerHTML = "Left : " + intersection.left.length;
+        intersectionDebuggerRight.innerHTML = "Right : " + intersection.right.length;
+    }, 20);
+
+
+    document.body.appendChild(trafficDebugger);
+    document.body.appendChild(intersectionDebuggerTop);
+    document.body.appendChild(intersectionDebuggerBottom);
+    document.body.appendChild(intersectionDebuggerLeft);
+    document.body.appendChild(intersectionDebuggerRight);
+})();
